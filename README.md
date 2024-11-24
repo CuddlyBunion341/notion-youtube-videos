@@ -40,7 +40,7 @@ Create a `.env` file in the root directory of the project and add the required e
 To run the project, use the following command:
 
 ```sh
-bun run index.ts
+bun run src/index.ts
 ```
 
 ## License
