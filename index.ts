@@ -59,7 +59,8 @@ const getMyVideos = async () => {
     return videos.data.items.map(video => ({
       title: video.snippet.title,
       description: video.snippet.description,
-      url: `https://www.youtube.com/watch?v=${video.snippet.resourceId.videoId}`
+      url: `https://www.youtube.com/watch?v=${video.snippet.resourceId.videoId}`,
+      thumbnail: video.snippet.thumbnails.default.url
     }));
   } catch (error) {
     console.error('Error fetching videos:', error.message);
