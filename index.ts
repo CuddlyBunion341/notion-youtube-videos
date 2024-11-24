@@ -16,6 +16,25 @@ const checkDatabaseAttributes = async () => {
   const response = await notion.databases.retrieve({ database_id: databaseId });
   let updated = false;
 
+  // Check if there is any property of type "title" and rename it to "Name"
+  for (const [key, value] of Object.entries(response.properties)) {
+    if (value.type === 'title' && key !== 'Name') {
+      await notion.databases.update({
+        database_id: databaseId,
+        properties: {
+          [key]: undefined,
+          Name: {
+            title: {}
+          }
+        }
+      });
+      console.info(`Database updated: Renamed "${key}" property to "Name".`);
+      updated = true;
+      break;
+    }
+  }
+
+  // Ensure "Name" property exists
   if (!response.properties.Name || response.properties.Name.type !== 'title') {
     await notion.databases.update({
       database_id: databaseId,
@@ -29,6 +48,7 @@ const checkDatabaseAttributes = async () => {
     updated = true;
   }
 
+  // Ensure "Description" property exists
   if (!response.properties.Description || response.properties.Description.type !== 'rich_text') {
     await notion.databases.update({
       database_id: databaseId,
@@ -42,6 +62,7 @@ const checkDatabaseAttributes = async () => {
     updated = true;
   }
 
+  // Ensure "URL" property exists
   if (!response.properties.URL || response.properties.URL.type !== 'url') {
     await notion.databases.update({
       database_id: databaseId,
@@ -55,12 +76,47 @@ const checkDatabaseAttributes = async () => {
     updated = true;
   }
 
+  // Ensure "VideoID" property exists
+  if (!response.properties.VideoID || response.properties.VideoID.type !== 'rich_text') {
+    await notion.databases.update({
+      database_id: databaseId,
+      properties: {
+        VideoID: {
+          rich_text: {}
+        }
+      }
+    });
+    console.info('Database updated: Added "VideoID" property of type "rich_text".');
+    updated = true;
+  }
+
   if (!updated) {
     console.info('Database schema is already up to date.');
   }
 };
 
+// Function to check if a video with the given ID already exists
+const videoExists = async (videoId) => {
+  const response = await notion.databases.query({
+    database_id: databaseId,
+    filter: {
+      property: 'VideoID',
+      rich_text: {
+        equals: videoId
+      }
+    }
+  });
+  return response.results.length > 0;
+};
+
+// Updated createNotionRecord function
 const createNotionRecord = async (video) => {
+  const exists = await videoExists(video.id);
+  if (exists) {
+    console.info(`Video with ID ${video.id} already exists in the database.`);
+    return;
+  }
+
   await notion.pages.create({
     parent: { database_id: databaseId },
     cover: {
@@ -90,6 +146,15 @@ const createNotionRecord = async (video) => {
       },
       URL: {
         url: video.url,
+      },
+      VideoID: {
+        rich_text: [
+          {
+            text: {
+              content: video.id,
+            },
+          },
+        ],
       },
     },
   });
@@ -145,10 +210,11 @@ const getMyVideos = async () => {
     }
 
     const videoDetails = videos.data.items.map(video => ({
+      id: video.snippet.resourceId.videoId,
       title: video.snippet.title,
       description: video.snippet.description,
       url: `https://www.youtube.com/watch?v=${video.snippet.resourceId.videoId}`,
-      thumbnail: video.snippet.thumbnails.default.url
+      thumbnail: video.snippet.thumbnails.high.url // Use high resolution thumbnail
     }));
 
     for (const video of videoDetails) {
