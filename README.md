@@ -66,9 +66,16 @@ Ensure your Notion database has the following structure:
 
 1. **Title Property**:
     - Name: `Name`
-    - Type: `Title`
+    - Type: `title`
 
-Other properties required by the script will be automatically added.
+Other properties required by the script will be automatically added:
+
+- **Description**: `rich_text`
+- **URL**: `url`
+- **VideoID**: `rich_text`
+- **UploadedAt**: `date`
+
+The thumbnail of the video will be set as the record page cover.
 
 ## Setting Environment Variables
 
