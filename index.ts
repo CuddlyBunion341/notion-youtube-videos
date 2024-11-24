@@ -158,6 +158,8 @@ const createNotionRecord = async (video) => {
       },
     },
   });
+
+  console.info(`Video with ID ${video.id} added to the database.`);
 };
 
 const getChannelIdByUsername = async (username: string) => {
