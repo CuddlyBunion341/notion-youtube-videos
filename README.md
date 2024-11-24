@@ -79,7 +79,7 @@ The thumbnail of the video will be set as the record page cover.
 
 ## Setting Environment Variables
 
-Create a `.env` file in the root directory of the project and add the required environment variables. You can refer to the `.env.example` file for the required variables.
+Create a `.env` file in the root directory of the project and add the required environment variables. You can refer to the [.env.example](./.env.example) file for the required variables.
 
 ## Running the Project
 
