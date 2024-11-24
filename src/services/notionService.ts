@@ -7,24 +7,6 @@ export const checkDatabaseAttributes = async () => {
   const response = await notion.databases.retrieve({ database_id: databaseId });
   let updated = false;
 
-  // Check if there is any property of type "title" and rename it to "Name"
-  for (const [key, value] of Object.entries(response.properties)) {
-    if (value.type === 'title' && key !== 'Name') {
-      await notion.databases.update({
-        database_id: databaseId,
-        properties: {
-          [key]: undefined,
-          Name: {
-            title: {}
-          }
-        }
-      });
-      console.info(`Database updated: Renamed "${key}" property to "Name".`);
-      updated = true;
-      break;
-    }
-  }
-
   // Ensure "Name" property exists
   if (!response.properties.Name || response.properties.Name.type !== 'title') {
     await notion.databases.update({
@@ -78,6 +60,20 @@ export const checkDatabaseAttributes = async () => {
       }
     });
     console.info('Database updated: Added "VideoID" property of type "rich_text".');
+    updated = true;
+  }
+
+  // Ensure "UploadedAt" property exists
+  if (!response.properties.UploadedAt || response.properties.UploadedAt.type !== 'date') {
+    await notion.databases.update({
+      database_id: databaseId,
+      properties: {
+        UploadedAt: {
+          date: {}
+        }
+      }
+    });
+    console.info('Database updated: Added "UploadedAt" property of type "date".');
     updated = true;
   }
 
@@ -144,6 +140,11 @@ export const createNotionRecord = async (video) => {
             },
           },
         ],
+      },
+      UploadedAt: {
+        date: {
+          start: video.uploadedAt,
+        },
       },
     },
   });

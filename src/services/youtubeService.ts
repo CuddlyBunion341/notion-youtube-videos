@@ -57,7 +57,8 @@ export const getMyVideos = async () => {
       title: video.snippet.title,
       description: video.snippet.description,
       url: `https://www.youtube.com/watch?v=${video.snippet.resourceId.videoId}`,
-      thumbnail: video.snippet.thumbnails.high.url // Use high resolution thumbnail
+      thumbnail: video.snippet.thumbnails.high.url,
+      uploadedAt: video.snippet.publishedAt
     }));
   } catch (error) {
     console.error('Error fetching videos:', error.message);
