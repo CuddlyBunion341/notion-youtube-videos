@@ -3,78 +3,38 @@ import { Client } from '@notionhq/client';
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const databaseId = process.env.NOTION_DATABASE_ID;
 
+const updateProperty = async (property, type) => {
+  await notion.databases.update({
+    database_id: databaseId,
+    properties: {
+      [property]: {
+        [type]: {}
+      }
+    }
+  });
+  console.info(`Database updated: Added "${property}" property of type "${type}".`);
+};
+
 export const checkDatabaseAttributes = async () => {
   const response = await notion.databases.retrieve({ database_id: databaseId });
   let updated = false;
 
-  // Ensure "Name" property exists
   if (!response.properties.Name || response.properties.Name.type !== 'title') {
-    await notion.databases.update({
-      database_id: databaseId,
-      properties: {
-        Name: {
-          title: {}
-        }
-      }
-    });
-    console.info('Database updated: Added "Name" property of type "title".');
-    updated = true;
+    throw new Error('Database schema error: "Name" property of type "title" is required.');
   }
 
-  // Ensure "Description" property exists
-  if (!response.properties.Description || response.properties.Description.type !== 'rich_text') {
-    await notion.databases.update({
-      database_id: databaseId,
-      properties: {
-        Description: {
-          rich_text: {}
-        }
-      }
-    });
-    console.info('Database updated: Added "Description" property of type "rich_text".');
-    updated = true;
-  }
+  const propertiesToCheck = {
+    Description: 'rich_text',
+    URL: 'url',
+    VideoID: 'rich_text',
+    UploadedAt: 'date'
+  };
 
-  // Ensure "URL" property exists
-  if (!response.properties.URL || response.properties.URL.type !== 'url') {
-    await notion.databases.update({
-      database_id: databaseId,
-      properties: {
-        URL: {
-          url: {}
-        }
-      }
-    });
-    console.info('Database updated: Added "URL" property of type "url".');
-    updated = true;
-  }
-
-  // Ensure "VideoID" property exists
-  if (!response.properties.VideoID || response.properties.VideoID.type !== 'rich_text') {
-    await notion.databases.update({
-      database_id: databaseId,
-      properties: {
-        VideoID: {
-          rich_text: {}
-        }
-      }
-    });
-    console.info('Database updated: Added "VideoID" property of type "rich_text".');
-    updated = true;
-  }
-
-  // Ensure "UploadedAt" property exists
-  if (!response.properties.UploadedAt || response.properties.UploadedAt.type !== 'date') {
-    await notion.databases.update({
-      database_id: databaseId,
-      properties: {
-        UploadedAt: {
-          date: {}
-        }
-      }
-    });
-    console.info('Database updated: Added "UploadedAt" property of type "date".');
-    updated = true;
+  for (const [property, type] of Object.entries(propertiesToCheck)) {
+    if (!response.properties[property] || response.properties[property].type !== type) {
+      await updateProperty(property, type);
+      updated = true;
+    }
   }
 
   if (!updated) {
