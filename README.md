@@ -86,7 +86,7 @@ Create a `.env` file in the root directory of the project and add the required e
 To run the project, use the following command:
 
 ```sh
-bun run src/index.ts
+bun run index.ts
 ```
 
 ## Periodically Fetching Videos
@@ -98,7 +98,7 @@ To periodically fetch videos, you can set up a cron job that runs a bash script 
     ```sh
     #!/bin/bash
     cd /path/to/your/notion-youtube-videos
-    bun run src/index.ts
+    bun run index.ts
     ```
 
     Make sure to replace `/path/to/your/notion-youtube-videos` with the actual path to your project directory.
